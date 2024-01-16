@@ -42,32 +42,34 @@ initializeDatabase();
 
 app.post('/submit-form', async (req, res) => {
   try {
-      const db = client.db(dbName);
-      const collection = db.collection(collectionName);
+    const db = client.db(dbName);
+    const collection = db.collection(collectionName);
 
-      const { name, email, subject, message, contactNumber } = req.body;
+    const { name, email, subject, message, contactNumber } = req.body;
 
-      // ... (rest of your code)
+    // Get the current timestamp in Chennai timezone and format it
+    const currentTimestamp = DateTime.now().setZone('Asia/Kolkata');
+    const currentTimestampFormatted = currentTimestamp.toFormat("MMMM d, yyyy, h:mm a");
 
-      const result = await collection.insertOne({
-          name,
-          email,
-          subject,
-          message,
-          contactNumber, // add contactNumber to the document
-          timestamp: currentTimestampFormatted,
-          timestampLocal: currentTimestamp,
-      });
+    const result = await collection.insertOne({
+      name,
+      email,
+      subject,
+      message,
+      contactNumber,
+      timestamp: currentTimestampFormatted,
+      // Store the local timestamp without converting to UTC
+      timestampLocal: currentTimestamp,
+    });
 
-      console.log(`Form data inserted with ID: ${result.insertedId}`);
+    console.log(`Form data inserted with ID: ${result.insertedId}`);
 
-      res.status(200).json({ message: 'Message shared successfully!' });
+    res.status(200).json({ message: 'Message shared successfully!' });
   } catch (error) {
-      console.error('Error submitting the form:', error);
-      res.status(500).json({ message: 'Internal server error' });
+    console.error('Error submitting the form:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
